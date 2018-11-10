@@ -220,60 +220,6 @@ impl Engine for Bn256 {
         }
     }
 
-    // fn final_exponentiation(r: &Fq12) -> Option<Fq12> {
-    //     let mut f1 = *r;
-    //     f1.conjugate();
-
-    //     match r.inverse() {
-    //         Some(mut f2) => {
-    //             let mut r = f1;
-    //             r.mul_assign(&f2);
-    //             f2 = r;
-    //             r.frobenius_map(2);
-    //             r.mul_assign(&f2);
-
-    //             fn exp_by_x(f: &mut Fq12, x: u64) {
-    //                 *f = f.pow(&[x]);
-    //             }
-
-    //             let mut x = BN_U;
-    //             let mut y0 = r;
-    //             y0.square();
-    //             let mut y1 = y0;
-    //             exp_by_x(&mut y1, x);
-    //             x >>= 1;
-    //             let mut y2 = y1;
-    //             exp_by_x(&mut y2, x);
-    //             x <<= 1;
-    //             let mut y3 = r;
-    //             y3.conjugate();
-    //             y1.mul_assign(&y3);
-    //             y1.conjugate();
-    //             y1.mul_assign(&y2);
-    //             y2 = y1;
-    //             exp_by_x(&mut y2, x);
-    //             y3 = y2;
-    //             exp_by_x(&mut y3, x);
-    //             y1.conjugate();
-    //             y3.mul_assign(&y1);
-    //             y1.conjugate();
-    //             y1.frobenius_map(3);
-    //             y2.frobenius_map(2);
-    //             y1.mul_assign(&y2);
-    //             y2 = y3;
-    //             exp_by_x(&mut y2, x);
-    //             y2.mul_assign(&y0);
-    //             y2.mul_assign(&r);
-    //             y1.mul_assign(&y2);
-    //             y2 = y3;
-    //             y2.frobenius_map(1);
-    //             y1.mul_assign(&y2);
-
-    //             Some(y1)
-    //         }
-    //         None => None,
-    //     }
-    // }
 }
 
 impl G2Prepared {

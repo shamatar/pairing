@@ -1395,9 +1395,9 @@ pub mod g2 {
             assert!(a.into_affine().is_on_curve());
             let b = G2::rand(&mut rng);
             let c = G2::rand(&mut rng);
-            // let a_affine = a.into_affine();
-            // let b_affine = b.into_affine();
-            // let c_affine = c.into_affine();
+            let a_affine = a.into_affine();
+            let b_affine = b.into_affine();
+            let c_affine = c.into_affine();
 
             // a + a should equal the doubling
             {
@@ -1422,28 +1422,56 @@ pub mod g2 {
 
             assert_eq!(ab, ba, "Addition should not depend on order");
 
-            let mut tmp = vec![G2::zero(); 3];
+            let mut tmp = vec![G2::zero(); 6];
 
             // (a + b) + c
             tmp[0] = a;
             tmp[0].add_assign(&b);
-            tmp[0].add_assign(&a);
-            // tmp[0].add_assign(&c);
+            tmp[0].add_assign(&c);
 
             // a + (b + c)
             tmp[1] = b;
-            // tmp[1].add_assign(&c);
-            tmp[1].add_assign(&a);
+            tmp[1].add_assign(&c);
             tmp[1].add_assign(&a);
 
             // (a + c) + b
             tmp[2] = a;
-            // tmp[2].add_assign(&c);
-            tmp[2].add_assign(&a);
+            tmp[2].add_assign(&c);
             tmp[2].add_assign(&b);
 
-            assert_eq!(tmp[0], tmp[1], "Addition should not depend on order");
-            assert_eq!(tmp[2], tmp[1], "Addition should not depend on order");
+            // Mixed addition
+
+            // (a + b) + c
+            tmp[3] = a_affine.into_projective();
+            tmp[3].add_assign_mixed(&b_affine);
+            tmp[3].add_assign_mixed(&c_affine);
+
+            // a + (b + c)
+            tmp[4] = b_affine.into_projective();
+            tmp[4].add_assign_mixed(&c_affine);
+            tmp[4].add_assign_mixed(&a_affine);
+
+            // (a + c) + b
+            tmp[5] = a_affine.into_projective();
+            tmp[5].add_assign_mixed(&c_affine);
+            tmp[5].add_assign_mixed(&b_affine);
+
+            // Comparisons
+            for i in 0..6 {
+                for j in 0..6 {
+                    assert_eq!(tmp[i], tmp[j]);
+                    assert_eq!(tmp[i].into_affine(), tmp[j].into_affine());
+                }
+
+                assert!(tmp[i] != a);
+                assert!(tmp[i] != b);
+                assert!(tmp[i] != c);
+
+                assert!(a != tmp[i]);
+                assert!(b != tmp[i]);
+                assert!(c != tmp[i]);
+            }
+ 
         }
     }
 
@@ -1453,6 +1481,7 @@ pub mod g2 {
 
         for _ in 0..1000 {
             // let r = G2::rand(&mut rng);
+            // assert!(r.into_affine().is_on_curve());
 
             let mut r = G2::one();
             let k = Fr::rand(&mut rng);
@@ -1478,6 +1507,32 @@ pub mod g2 {
 
             t1.negate();
             assert_eq!(t1, t2);
+        }
+    }
+
+    #[test]
+    fn mul_by_order_tests() {
+        let mut rng = XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+
+        for _ in 0..1000 {
+            // let r = G2::rand(&mut rng);
+
+            let mut r = G2::one();
+            let k = Fr::rand(&mut rng);
+            r.mul_assign(k);
+
+            let order = Fr::char();
+
+            let mut q = G2::one();
+            q.mul_assign(order);
+            assert!(q.is_zero());
+
+            r.mul_assign(order);
+            assert!(r.is_zero());
+
+            // let mut t = G2::rand(&mut rng);
+            // t.mul_assign(order);
+            // assert!(t.is_zero());
         }
     }
 

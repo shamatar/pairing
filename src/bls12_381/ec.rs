@@ -1262,6 +1262,7 @@ pub mod g1 {
     #[test]
     fn g1_curve_tests() {
         ::tests::curve::curve_tests::<G1>();
+        ::tests::curve::random_transformation_tests_with_cofactor::<G1>();
     }
 }
 
@@ -2015,6 +2016,7 @@ pub mod g2 {
     #[test]
     fn g2_curve_tests() {
         ::tests::curve::curve_tests::<G2>();
+        ::tests::curve::random_transformation_tests_with_cofactor::<G2>();
     }
 }
 

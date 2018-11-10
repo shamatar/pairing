@@ -604,6 +604,48 @@ fn test_pairing() {
 
 }
 
+#[test]
+fn random_bilinearity_tests() {
+    use {CurveProjective};
+    use ff::PrimeField;
+
+    let mut rng = XorShiftRng::from_seed([0x5dbe6259, 0x8d313d76, 0x3237db17, 0xe5bc0654]);
+
+    for _ in 0..1000 {
+        let mut a = G1::one();
+        let ka = Fr::rand(&mut rng);
+        a.mul_assign(ka);
+        let mut b = G2::one();
+        let kb = Fr::rand(&mut rng);
+        b.mul_assign(kb);
+
+        let c = Fr::rand(&mut rng);
+        let d = Fr::rand(&mut rng);
+
+        let mut ac = a;
+        ac.mul_assign(c);
+
+        let mut ad = a;
+        ad.mul_assign(d);
+
+        let mut bc = b;
+        bc.mul_assign(c);
+
+        let mut bd = b;
+        bd.mul_assign(d);
+
+        let acbd = Bn256::pairing(ac, bd);
+        let adbc = Bn256::pairing(ad, bc);
+
+        let mut cd = c;
+        cd.mul_assign(&d);
+
+        let abcd = Bn256::pairing(a, b).pow(cd.into_repr());
+
+        assert_eq!(acbd, adbc);
+        assert_eq!(acbd, abcd);
+    }
+}
 
 #[test]
 fn bn256_engine_tests() {

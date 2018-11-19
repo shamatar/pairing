@@ -193,24 +193,24 @@ macro_rules! curve_impl {
 
         }
 
-        impl Rand for $projective {
-            fn rand<R: Rng>(rng: &mut R) -> Self {
-                loop {
-                    let x = rng.gen();
-                    let greatest = rng.gen();
+        // impl Rand for $projective {
+        //     fn rand<R: Rng>(rng: &mut R) -> Self {
+        //         loop {
+        //             let x = rng.gen();
+        //             let greatest = rng.gen();
 
-                    if let Some(p) = $affine::get_point_from_x(x, greatest) {
-                        if !p.is_zero() {
-                            // let mut q = p.into_projective();
-                            // q.mul_assign($scalarfield::char()); && q.is_zero()
-                            if p.is_on_curve() {
-                                return p.into_projective();
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        //             if let Some(p) = $affine::get_point_from_x(x, greatest) {
+        //                 if !p.is_zero() {
+        //                     // let mut q = p.into_projective();
+        //                     // q.mul_assign($scalarfield::char()); && q.is_zero()
+        //                     if p.is_on_curve() {
+        //                         return p.into_projective();
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         impl CurveProjective for $projective {
             type Engine = Bn256;
@@ -647,6 +647,40 @@ pub mod g1 {
     #[derive(Copy, Clone)]
     pub struct G1Uncompressed([u8; 64]);
 
+    impl Rand for G1 {
+        fn rand<R: Rng>(rng: &mut R) -> Self {
+            loop {
+                let x = rng.gen();
+                let greatest = rng.gen();
+
+                if let Some(p) = G1Affine::get_point_from_x(x, greatest) {
+                    if !p.is_zero() {
+                        if p.is_on_curve() {
+                            return p.into_projective();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    impl Rand for G1Affine {
+        fn rand<R: Rng>(rng: &mut R) -> Self {
+            loop {
+                let x = rng.gen();
+                let greatest = rng.gen();
+
+                if let Some(p) = G1Affine::get_point_from_x(x, greatest) {
+                    if !p.is_zero() {
+                        if p.is_on_curve() {
+                            return p;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     impl AsRef<[u8]> for G1Uncompressed {
         fn as_ref(&self) -> &[u8] {
             &self.0
@@ -988,6 +1022,24 @@ pub mod g2 {
         G2Compressed,
         G1Affine
     );
+
+    impl Rand for G2 {
+        fn rand<R: Rng>(rng: &mut R) -> Self {
+            let mut r = G2::one();
+            let k = Fr::rand(rng);
+            r.mul_assign(k);
+            return r;
+        }
+    }
+
+    impl Rand for G2Affine {
+        fn rand<R: Rng>(rng: &mut R) -> Self {
+            let mut r = G2::one();
+            let k = Fr::rand(rng);
+            r.mul_assign(k);
+            return r.into_affine();
+        }
+    }
 
     #[derive(Copy, Clone)]
     pub struct G2Uncompressed([u8; 128]);
